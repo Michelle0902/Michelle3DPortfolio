@@ -294,7 +294,7 @@ function MonitorArrows({ scene }) {
 }
 
 function Model({ onMonitorClick, onSceneReady }) {
-    const { scene, error } = useGLTF('/portfolio-room.min.glb');
+    const { scene, error } = useGLTF('/api/glb');
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
@@ -315,7 +315,7 @@ function Model({ onMonitorClick, onSceneReady }) {
                     Portfolio Room
                 </Text>
                 <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
-                    (Model loading...)
+                    (Loading 3D model...)
                 </Text>
             </group>
         );
