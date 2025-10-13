@@ -294,7 +294,9 @@ function MonitorArrows({ scene }) {
 }
 
 function Model({ onMonitorClick, onSceneReady }) {
-    const { scene, error } = useGLTF('/api/glb');
+    // Use API endpoint for production (Vercel), direct path for development
+    const glbPath = import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
+    const { scene, error } = useGLTF(glbPath);
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
