@@ -79,9 +79,7 @@ export default function WorkExperienceCarousel({ onClose }) {
     
     // Debug when component mounts
     React.useEffect(() => {
-        console.log(' WorkExperienceCarousel component mounted');
         return () => {
-            console.log(' WorkExperienceCarousel component unmounting');
         };
     }, []);
 

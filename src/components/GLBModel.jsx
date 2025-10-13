@@ -219,7 +219,6 @@ function MonitorArrows({ scene }) {
                 
                 if (!foundPosition) {
                     foundPosition = worldPos;
-                    console.log('🎯 Monitor found at position:', worldPos);
                 }
             }
         });
@@ -306,25 +305,6 @@ function Model({ onMonitorClick, onSceneReady }) {
     // Handle GLB loading error
     if (error) {
         console.error('Failed to load GLB model:', error);
-        console.error('Error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-
-        // Try to fetch the GLB file directly to debug
-        fetch('/portfolio-room.min.glb')
-            .then(response => {
-                console.log('GLB fetch response:', response.status, response.statusText);
-                console.log('GLB fetch headers:', response.headers);
-                return response.text();
-            })
-            .then(text => {
-                console.log('GLB fetch content preview:', text.substring(0, 200));
-            })
-            .catch(fetchError => {
-                console.error('GLB fetch error:', fetchError);
-            });
 
         return (
             <group>
@@ -482,7 +462,6 @@ function Model({ onMonitorClick, onSceneReady }) {
         
         if (intersections.length > 0) {
             const clickedObject = intersections[0].object;
-            console.log("clickedObject", clickedObject);
             
             if (clickedObject.name?.toLowerCase().includes('plane006_2') ||
                 clickedObject.name?.toLowerCase().includes('plane005_2') ||
@@ -530,9 +509,7 @@ export default function GLBModel() {
 
     // Debug carousel state
     React.useEffect(() => {
-        console.log('🔄 Carousel state changed:', showCarousel);
     }, [showCarousel]);
-    console.log("camera ref", controlsRef.current);
     const resetCamera = () => {
         if (controlsRef.current) {
             // Reset camera to specific viewing position
@@ -548,7 +525,6 @@ export default function GLBModel() {
     };
     
     const handleSceneReady = (scene) => {
-        console.log('📦 Scene loaded, adding animated arrows');
         setLoadedScene(scene);
     };
 
@@ -564,7 +540,6 @@ export default function GLBModel() {
                         powerPreference: "high-performance"
                     }}
                     onCreated={(state) => {
-                        console.log('WebGL context created:', state.gl.getContext());
                     }}
                 >
                     <Suspense fallback={null}>
