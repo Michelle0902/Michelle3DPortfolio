@@ -6,6 +6,35 @@ import * as THREE from 'three';
 import WorkExperienceCarousel from './WorkExperienceCarousel';
 import './GLBModel.css';
 
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.error('GLBModel Error:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="error-fallback">
+                    <h2>Something went wrong with the 3D scene.</h2>
+                    <p>Please refresh the page to try again.</p>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
 // Animated Moon/Sun Component
 function AnimatedCelestialBody({ isDarkTheme }) {
     const moonRef = useRef();
@@ -36,7 +65,7 @@ function AnimatedCelestialBody({ isDarkTheme }) {
             const currentY = sunRef.current.position.y;
             const diff = sunTargetY - currentY;
             sunRef.current.position.y += diff * 0.05;
-            
+
             // Fade sun in/out
             if (sunRef.current.material) {
                 const targetOpacity = isDarkTheme ? 0 : 1;
@@ -94,32 +123,21 @@ function AnimatedCelestialBody({ isDarkTheme }) {
     );
 }
 
-// Ground plane component
-// function Ground({ isDarkTheme }) {
-//     return (
-//         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-//             <planeGeometry args={[200, 200]} />
-//             <meshStandardMaterial 
-//                 color={isDarkTheme ? '#2a2a2a' : '#e8e8e8'}
-//                 roughness={0.8}
-//                 metalness={0.2}
-//             />
-//         </mesh>
-//     );
-// }
 
 // Component to handle camera positioning
 function CameraController({ isDarkTheme }) {
     const { camera, scene } = useThree();
     
     React.useEffect(() => {
-        // Set camera to look down at the room from above
-        camera.position.set(-10, -2, 10);
-        // camera.lookAt(-30, 0, 50);
-        camera.updateProjectionMatrix();
-        
-        // Set background color based on theme
-        scene.background = new THREE.Color(isDarkTheme ? '#1a1a1a' : '#f5f5f5');
+        if (camera && scene) {
+            // Set camera to look down at the room from above
+            camera.position.set(-10, -2, 10);
+            camera.lookAt(-30, 0, 50);
+            camera.updateProjectionMatrix();
+            
+            // Set background color based on theme
+            scene.background = new THREE.Color(isDarkTheme ? '#1a1a1a' : '#f5f5f5');
+        }
     }, [camera, scene, isDarkTheme]);
     
     return null;
@@ -277,7 +295,7 @@ function MonitorArrows({ scene }) {
 }
 
 function Model({ onMonitorClick, onSceneReady }) {
-    const { scene } = useGLTF('/portfolio-room.glb');
+    const { scene } = useGLTF('/portfolio-room.min.glb');
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
@@ -480,22 +498,26 @@ export default function GLBModel() {
     };
 
     return (
-        <>
+        <ErrorBoundary>
             <div className="glb-model-container fullscreen">
                 <Canvas
                     camera={{ position: [0, 2, 7], fov: 75 }}
                     style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }}
+                    gl={{
+                        antialias: true,
+                        alpha: false,
+                        powerPreference: "high-performance"
+                    }}
+                    onCreated={(state) => {
+                        console.log('WebGL context created:', state.gl.getContext());
+                    }}
                 >
                     <Suspense fallback={null}>
                         <CameraController isDarkTheme={isDarkTheme} />
-                        {/* <Ground isDarkTheme={isDarkTheme} /> */}
                         <AnimatedCelestialBody isDarkTheme={isDarkTheme} />
                         <Environment preset={isDarkTheme ? "lobby" : "apartment"} />
-                        {/* <ambientLight intensity={0.3} />
-                        <directionalLight position={[10, 10, 5]} intensity={0.5} /> */}
                         <ambientLight intensity={isDarkTheme ? 0.5 : 0.8} />
                         <directionalLight position={[10, 10, 5]} intensity={isDarkTheme ? 1.5 : 2.0} />
-
                         <Model onMonitorClick={handleMonitorClick} onSceneReady={handleSceneReady} />
                         {loadedScene && <MonitorArrows scene={loadedScene} />}
                         <OrbitControls 
@@ -531,6 +553,6 @@ export default function GLBModel() {
             {showCarousel && (
                 <WorkExperienceCarousel onClose={handleCloseCarousel} />
             )}
-        </>
+        </ErrorBoundary>
     );
 }
