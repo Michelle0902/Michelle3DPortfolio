@@ -1,0 +1,355 @@
+.carousel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.carousel-container {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 900px;
+    max-width: 90vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+    animation: slideInFromRight 0.4s ease-out;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Custom scrollbar */
+.carousel-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.carousel-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.close-button {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    z-index: 10;
+}
+
+.close-button button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.close-button button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.carousel-content {
+    flex: 1;
+    margin-bottom: 20px;
+    overflow-y: auto;
+}
+
+.experience-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.experience-header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+}
+
+.experience-header h2 {
+    color: #333;
+    font-size: 2rem;
+    margin: 0 0 8px 0;
+    font-weight: 700;
+}
+
+.experience-header h3 {
+    color: #667eea;
+    font-size: 1.3rem;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.location {
+    color: #888;
+    font-size: 1rem;
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.duration {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+    font-style: italic;
+}
+
+.experience-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.experience-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.placeholder-image {
+    width: 200px;
+    height: 150px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.experience-details {
+    color: #333;
+}
+
+.achievements {
+    margin-bottom: 25px;
+}
+
+.achievements h4 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.achievements ul {
+    list-style-type: disc;
+    padding-left: 25px;
+    margin: 0;
+}
+
+.achievements li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+.technologies h4 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tech-tag {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.tech-tag:hover {
+    transform: translateY(-2px);
+}
+
+.carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 20px;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(102, 126, 234, 1) 0%, rgba(102, 126, 234, 0) 100%);
+    padding-bottom: 10px;
+}
+
+.nav-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.nav-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.carousel-indicators {
+    display: flex;
+    gap: 10px;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background: white;
+    transform: scale(1.2);
+}
+
+.indicator:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .carousel-container {
+        width: 100%;
+        max-width: 100vw;
+        padding: 20px;
+    }
+    
+    .experience-body {
+        gap: 20px;
+    }
+    
+    .experience-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .experience-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .placeholder-image {
+        width: 150px;
+        height: 120px;
+        font-size: 3rem;
+    }
+    
+    .carousel-controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .nav-button {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        flex: 1;
+        min-width: 100px;
+    }
+    
+    .carousel-indicators {
+        width: 100%;
+        justify-content: center;
+        order: -1;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-container {
+        padding: 15px;
+    }
+    
+    .experience-card {
+        padding: 20px;
+    }
+    
+    .experience-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .description {
+        font-size: 1rem;
+    }
+    
+    .tech-tag {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}
