@@ -24,131 +24,15 @@ class ErrorBoundary extends React.Component {
     render() {
         if (this.state.hasError) {
             return (
-                <ErrorBoundaryFallback onMonitorClick={this.props.onMonitorClick} />
+                <div className="error-fallback">
+                    <h2>Something went wrong with the 3D scene.</h2>
+                    <p>Please refresh the page to try again.</p>
+                </div>
             );
         }
 
         return this.props.children;
     }
-}
-
-// Fallback component that renders a 3D scene
-function ErrorBoundaryFallback({ onMonitorClick }) {
-    const [showCarousel, setShowCarousel] = useState(false);
-    
-    const handleMonitorClick = () => {
-        setShowCarousel(true);
-    };
-    
-    const handleCloseCarousel = () => {
-        setShowCarousel(false);
-    };
-    
-    return (
-        <div className="glb-model-container fullscreen">
-            <Canvas
-                camera={{ position: [0, 2, 7], fov: 75 }}
-                style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }}
-                gl={{ 
-                    antialias: true,
-                    alpha: false,
-                    powerPreference: "high-performance"
-                }}
-            >
-                <Suspense fallback={null}>
-                    <Environment preset="lobby" />
-                    <ambientLight intensity={0.5} />
-                    <directionalLight position={[10, 10, 5]} intensity={1.5} />
-                    
-                    {/* Fallback 3D Scene */}
-                    <group>
-                        {/* Floor */}
-                        <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                            <planeGeometry args={[20, 20]} />
-                            <meshStandardMaterial color="#4a5568" />
-                        </mesh>
-                        
-                        {/* Walls */}
-                        <mesh position={[0, 2, -10]}>
-                            <planeGeometry args={[20, 6]} />
-                            <meshStandardMaterial color="#2d3748" />
-                        </mesh>
-                        <mesh position={[-10, 2, 0]} rotation={[0, Math.PI / 2, 0]}>
-                            <planeGeometry args={[20, 6]} />
-                            <meshStandardMaterial color="#2d3748" />
-                        </mesh>
-                        <mesh position={[10, 2, 0]} rotation={[0, -Math.PI / 2, 0]}>
-                            <planeGeometry args={[20, 6]} />
-                            <meshStandardMaterial color="#2d3748" />
-                        </mesh>
-                        
-                        {/* Desk */}
-                        <mesh position={[0, -0.5, 3]}>
-                            <boxGeometry args={[8, 1, 3]} />
-                            <meshStandardMaterial color="#8b7355" />
-                        </mesh>
-                        
-                        {/* Monitor */}
-                        <mesh position={[0, 1.5, 3]} onClick={handleMonitorClick}>
-                            <boxGeometry args={[4, 3, 0.2]} />
-                            <meshStandardMaterial color="#1a202c" emissive="#4facfe" emissiveIntensity={0.3} />
-                        </mesh>
-                        
-                        {/* Chair */}
-                        <mesh position={[0, -0.8, 0]}>
-                            <boxGeometry args={[2, 1.6, 2]} />
-                            <meshStandardMaterial color="#4a5568" />
-                        </mesh>
-                        
-                        {/* Decorative elements */}
-                        <mesh position={[6, 1, 5]}>
-                            <sphereGeometry args={[0.5, 16, 16]} />
-                            <meshStandardMaterial color="#ff6b6b" />
-                        </mesh>
-                        <mesh position={[-6, 1, 5]}>
-                            <sphereGeometry args={[0.5, 16, 16]} />
-                            <meshStandardMaterial color="#4ecdc4" />
-                        </mesh>
-                        
-                        <Text position={[0, 3, 0]} fontSize={0.5} color="white">
-                            Interactive Portfolio Room
-                        </Text>
-                        <Text position={[0, 2.5, 0]} fontSize={0.3} color="white">
-                            (Click the monitor to explore)
-                        </Text>
-                        <Text position={[0, 2, 0]} fontSize={0.2} color="white">
-                            Fallback 3D Scene
-                        </Text>
-                    </group>
-                    
-                    <OrbitControls 
-                        enablePan={true}
-                        enableZoom={true}
-                        enableRotate={true}
-                        minDistance={2}
-                        maxDistance={20}
-                        target={[0, 0, 0]}
-                        autoRotate={false}
-                    />
-                </Suspense>
-            </Canvas>
-            
-            <div className="model-info">
-                <p>Interactive 3D Portfolio Room</p>
-                <p className="controls-hint">🎯 <strong>Click the monitor</strong> to explore work experience!</p>
-                <p className="controls-hint">Use mouse to rotate, scroll to zoom, and drag to pan</p>
-                <div className="button-group">
-                    <button className="reset-camera-btn" onClick={() => window.location.reload()}>
-                        🔄 Try Original Model
-                    </button>
-                </div>
-            </div>
-            
-            {showCarousel && (
-                <WorkExperienceCarousel onClose={handleCloseCarousel} />
-            )}
-        </div>
-    );
 }
 
 // Animated Moon/Sun Component
@@ -409,7 +293,7 @@ function MonitorArrows({ scene }) {
     );
 }
 
-function Model({ onMonitorClick, onSceneReady, useFallback, setUseFallback }) {
+function Model({ onMonitorClick, onSceneReady }) {
     const { scene, error } = useGLTF('/portfolio-room.min.glb');
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
@@ -418,96 +302,27 @@ function Model({ onMonitorClick, onSceneReady, useFallback, setUseFallback }) {
     const monitorRef = useRef();
     const originalMaterials = useRef({});
     
-    // Auto-fallback after 10 seconds if GLB doesn't load
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            if (!scene && !error) {
-                setUseFallback(true);
-            }
-        }, 10000);
-        
-        return () => clearTimeout(timer);
-    }, [scene, error]);
-    
-    // Handle GLB loading error or timeout fallback
-    if (error || useFallback) {
+    // Handle GLB loading error
+    if (error) {
         console.error('Failed to load GLB model:', error);
-
         return (
             <group>
-                {/* Floor */}
-                <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                    <planeGeometry args={[20, 20]} />
-                    <meshStandardMaterial color="#4a5568" />
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[4, 4, 4]} />
+                    <meshStandardMaterial color="#667eea" />
                 </mesh>
-                
-                {/* Walls */}
-                <mesh position={[0, 2, -10]}>
-                    <planeGeometry args={[20, 6]} />
-                    <meshStandardMaterial color="#2d3748" />
-                </mesh>
-                <mesh position={[-10, 2, 0]} rotation={[0, Math.PI / 2, 0]}>
-                    <planeGeometry args={[20, 6]} />
-                    <meshStandardMaterial color="#2d3748" />
-                </mesh>
-                <mesh position={[10, 2, 0]} rotation={[0, -Math.PI / 2, 0]}>
-                    <planeGeometry args={[20, 6]} />
-                    <meshStandardMaterial color="#2d3748" />
-                </mesh>
-                
-                {/* Desk */}
-                <mesh position={[0, -0.5, 3]}>
-                    <boxGeometry args={[8, 1, 3]} />
-                    <meshStandardMaterial color="#8b7355" />
-                </mesh>
-                
-                {/* Monitor */}
-                <mesh position={[0, 1.5, 3]} onClick={onMonitorClick}>
-                    <boxGeometry args={[4, 3, 0.2]} />
-                    <meshStandardMaterial color="#1a202c" emissive="#4facfe" emissiveIntensity={0.3} />
-                </mesh>
-                
-                {/* Chair */}
-                <mesh position={[0, -0.8, 0]}>
-                    <boxGeometry args={[2, 1.6, 2]} />
-                    <meshStandardMaterial color="#4a5568" />
-                </mesh>
-                
-                {/* Decorative elements */}
-                <mesh position={[6, 1, 5]}>
-                    <sphereGeometry args={[0.5, 16, 16]} />
-                    <meshStandardMaterial color="#ff6b6b" />
-                </mesh>
-                <mesh position={[-6, 1, 5]}>
-                    <sphereGeometry args={[0.5, 16, 16]} />
-                    <meshStandardMaterial color="#4ecdc4" />
-                </mesh>
-                
-                <Text position={[0, 3, 0]} fontSize={0.5} color="white">
-                    Interactive Portfolio Room
+                <Text position={[0, 2, 0]} fontSize={0.5} color="white">
+                    Portfolio Room
                 </Text>
-                <Text position={[0, 2.5, 0]} fontSize={0.3} color="white">
-                    (Click the monitor to explore)
-                </Text>
-                <Text position={[0, 2, 0]} fontSize={0.2} color="white">
-                    Fallback 3D Scene
+                <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
+                    (Model loading...)
                 </Text>
             </group>
         );
     }
 
     if (!scene) {
-        return (
-            <group>
-                <mesh position={[0, 0, 0]}>
-                    <boxGeometry args={[2, 2, 2]} />
-                    <meshStandardMaterial color="#888888" />
-                </mesh>
-                <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
-                    Loading 3D Model...
-                </Text>
-            </group>
-        );
+        return null; // Loading state
     }
     // Notify parent when scene is ready
     React.useEffect(() => {
@@ -668,7 +483,6 @@ export default function GLBModel() {
     const [showCarousel, setShowCarousel] = useState(false);
     const [loadedScene, setLoadedScene] = useState(null);
     const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark theme
-    const [useFallback, setUseFallback] = useState(false);
     const controlsRef = useRef();
 
     const handleMonitorClick = () => {
@@ -701,7 +515,7 @@ export default function GLBModel() {
     };
 
     return (
-        <ErrorBoundary onMonitorClick={handleMonitorClick}>
+        <ErrorBoundary>
             <div className="glb-model-container fullscreen">
                 <Canvas
                     camera={{ position: [0, 2, 7], fov: 75 }}
@@ -720,7 +534,7 @@ export default function GLBModel() {
                         <Environment preset={isDarkTheme ? "lobby" : "apartment"} />
                         <ambientLight intensity={isDarkTheme ? 0.5 : 0.8} />
                         <directionalLight position={[10, 10, 5]} intensity={isDarkTheme ? 1.5 : 2.0} />
-                                   <Model onMonitorClick={handleMonitorClick} onSceneReady={handleSceneReady} useFallback={useFallback} setUseFallback={setUseFallback} />
+                                   <Model onMonitorClick={handleMonitorClick} onSceneReady={handleSceneReady} />
                         {loadedScene && <MonitorArrows scene={loadedScene} />}
                         <OrbitControls 
                             ref={controlsRef}
@@ -735,24 +549,21 @@ export default function GLBModel() {
                     </Suspense>
                 </Canvas>
                 
-                {!showCarousel && (
-                    <div className="model-info">
-                        <p>Interactive 3D Portfolio Room</p>
-                        <p className="controls-hint">🎯 <strong>Follow the orange arrows</strong> to find the monitor!</p>
-                        <p className="controls-hint">Use mouse to rotate, scroll to zoom, and drag to pan</p>
-                        <div className="button-group">
-                            <button className="reset-camera-btn" onClick={resetCamera}>
-                                📷 Reset View
-                            </button>
+                           {!showCarousel && (
+                               <div className="model-info">
+                                   <p>Interactive 3D Portfolio Room</p>
+                                   <p className="controls-hint">🎯 <strong>Follow the orange arrows</strong> to find the monitor!</p>
+                                   <p className="controls-hint">Use mouse to rotate, scroll to zoom, and drag to pan</p>
+                                   <div className="button-group">
+                                       <button className="reset-camera-btn" onClick={resetCamera}>
+                                           📷 Reset View
+                                       </button>
                                        <button className="reset-camera-btn" onClick={toggleTheme}>
                                            {isDarkTheme ? '☀️ Light Mode' : '🌙 Dark Mode'}
                                        </button>
-                                       <button className="reset-camera-btn" onClick={() => setUseFallback(true)}>
-                                           🏠 Use Fallback Scene
-                                       </button>
-                        </div>
-                    </div>
-                )}
+                                   </div>
+                               </div>
+                           )}
             </div>
 
             {showCarousel && (
