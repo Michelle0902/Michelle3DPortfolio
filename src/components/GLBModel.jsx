@@ -295,7 +295,7 @@ function MonitorArrows({ scene }) {
 }
 
 function Model({ onMonitorClick, onSceneReady }) {
-    const { scene, error } = useGLTF('/portfolio-room.min.glb', true);
+    const { scene, error } = useGLTF('/portfolio-room.min.glb');
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
@@ -306,6 +306,26 @@ function Model({ onMonitorClick, onSceneReady }) {
     // Handle GLB loading error
     if (error) {
         console.error('Failed to load GLB model:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+
+        // Try to fetch the GLB file directly to debug
+        fetch('/portfolio-room.min.glb')
+            .then(response => {
+                console.log('GLB fetch response:', response.status, response.statusText);
+                console.log('GLB fetch headers:', response.headers);
+                return response.text();
+            })
+            .then(text => {
+                console.log('GLB fetch content preview:', text.substring(0, 200));
+            })
+            .catch(fetchError => {
+                console.error('GLB fetch error:', fetchError);
+            });
+
         return (
             <group>
                 <mesh position={[0, 0, 0]}>
@@ -316,14 +336,27 @@ function Model({ onMonitorClick, onSceneReady }) {
                     Portfolio Room
                 </Text>
                 <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
-                    (Model loading...)
+                    (Fallback Model)
+                </Text>
+                <Text position={[0, 1, 0]} fontSize={0.2} color="white">
+                    GLB Loading Failed
                 </Text>
             </group>
         );
     }
 
     if (!scene) {
-        return null; // Loading state
+        return (
+            <group>
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[2, 2, 2]} />
+                    <meshStandardMaterial color="#888888" />
+                </mesh>
+                <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
+                    Loading 3D Model...
+                </Text>
+            </group>
+        );
     }
     // Notify parent when scene is ready
     React.useEffect(() => {
