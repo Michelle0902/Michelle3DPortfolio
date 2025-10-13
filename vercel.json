@@ -6,7 +6,11 @@
   "devCommand": "npm run dev",
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/home",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/loading",
       "destination": "/index.html"
     }
   ],
