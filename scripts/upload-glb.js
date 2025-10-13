@@ -16,6 +16,7 @@ async function uploadGLB() {
     const blob = await put('portfolio-room.min.glb', fileBuffer, {
       access: 'public',
       contentType: 'model/gltf-binary',
+      token: process.env.BLOB_READ_WRITE_TOKEN || 'vercel_blob_rw_ih4hMkjUh0idhrGL_j08kVDrDm6W9EDnbfRBzzoz1DE2DtV',
     });
 
     console.log('✅ GLB file uploaded successfully!');
