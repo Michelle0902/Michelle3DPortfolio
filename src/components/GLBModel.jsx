@@ -295,7 +295,7 @@ function MonitorArrows({ scene }) {
 }
 
 function Model({ onMonitorClick, onSceneReady }) {
-    const { scene } = useGLTF('/portfolio-room.min.glb');
+    const { scene, error } = useGLTF('/portfolio-room.min.glb', true);
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
@@ -303,6 +303,28 @@ function Model({ onMonitorClick, onSceneReady }) {
     const monitorRef = useRef();
     const originalMaterials = useRef({});
     
+    // Handle GLB loading error
+    if (error) {
+        console.error('Failed to load GLB model:', error);
+        return (
+            <group>
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[4, 4, 4]} />
+                    <meshStandardMaterial color="#667eea" />
+                </mesh>
+                <Text position={[0, 2, 0]} fontSize={0.5} color="white">
+                    Portfolio Room
+                </Text>
+                <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
+                    (Model loading...)
+                </Text>
+            </group>
+        );
+    }
+
+    if (!scene) {
+        return null; // Loading state
+    }
     // Notify parent when scene is ready
     React.useEffect(() => {
         if (onSceneReady) {
