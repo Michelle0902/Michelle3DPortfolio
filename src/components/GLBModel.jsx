@@ -1,11 +1,83 @@
-import React, { Suspense, useState, useRef } from 'react';
+import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, Text } from '@react-three/drei';
+import { OrbitControls, useGLTF, Environment, Text, useProgress } from '@react-three/drei';
 import { Raycaster, Vector2 } from 'three';
 import * as THREE from 'three';
 import WorkExperienceCarousel from './WorkExperienceCarousel';
 import './GLBModel.css';
 import blobConfig from '../blob-config.json';
+
+// 3D Loading Component (for Canvas fallback)
+function LoadingScreen3D() {
+    const { progress } = useProgress();
+    
+    return (
+        <group>
+            {/* Simple 3D loading indicator */}
+            <mesh position={[0, 0, 0]}>
+                <boxGeometry args={[2, 2, 2]} />
+                <meshStandardMaterial color="#667eea" transparent opacity={0.8} />
+            </mesh>
+            <Text 
+                position={[0, 1, 0]} 
+                fontSize={0.3} 
+                color="white"
+                anchorX="center"
+                anchorY="middle"
+            >
+                Loading... {Math.round(progress)}%
+            </Text>
+        </group>
+    );
+}
+
+// HTML Loading Screen Component (for overlay)
+function LoadingScreenHTML() {
+    const [dots, setDots] = useState('');
+    
+    // Animate loading dots
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDots(prev => prev.length >= 3 ? '' : prev + '.');
+        }, 500);
+        return () => clearInterval(interval);
+    }, []);
+    
+    return (
+        <div className="loading-screen">
+            <div className="loading-container">
+                <div className="loading-spinner">
+                    <div className="spinner"></div>
+                </div>
+                
+                <div className="loading-content">
+                    <h2>Loading Portfolio</h2>
+                    <p className="loading-text">
+                        Preparing 3D Experience{dots}
+                    </p>
+                    <div className="progress-container">
+                        <div className="progress-bar">
+                            <div 
+                                className="progress-fill" 
+                                style={{ width: `100%` }}
+                            ></div>
+                        </div>
+                        <span className="progress-text">Loading...</span>
+                    </div>
+                    
+                    <div className="loading-tips">
+                        <p className="loading-hint">
+                            💡 <strong>Tip:</strong> This detailed 3D portfolio room includes interactive elements
+                        </p>
+                        <p className="loading-hint">
+                            🎯 Look for the glowing monitor to explore my work experience
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -297,7 +369,10 @@ function MonitorArrows({ scene }) {
 function Model({ onMonitorClick, onSceneReady }) {
     // Use Blob URL if available, otherwise fallback to local/production paths
     const glbPath = blobConfig.blobUrl || (import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb');
-    const { scene, error } = useGLTF(glbPath);
+    const { scene, error } = useGLTF(glbPath, true); // true = draco compression enabled
+    
+    // Track loading progress (for future use)
+    // const [loadingProgress, setLoadingProgress] = useState(0);
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
@@ -305,31 +380,9 @@ function Model({ onMonitorClick, onSceneReady }) {
     const monitorRef = useRef();
     const originalMaterials = useRef({});
     
-    // Handle GLB loading error
-    if (error) {
-        console.error('Failed to load GLB model:', error);
-        return (
-            <group>
-                <mesh position={[0, 0, 0]}>
-                    <boxGeometry args={[4, 4, 4]} />
-                    <meshStandardMaterial color="#667eea" />
-                </mesh>
-                <Text position={[0, 2, 0]} fontSize={0.5} color="white">
-                    Portfolio Room
-                </Text>
-                <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
-                    (Loading 3D model...)
-                </Text>
-            </group>
-        );
-    }
-
-    if (!scene) {
-        return null; // Loading state
-    }
     // Notify parent when scene is ready
     React.useEffect(() => {
-        if (onSceneReady) {
+        if (onSceneReady && scene) {
             onSceneReady(scene);
         }
         
@@ -372,6 +425,29 @@ function Model({ onMonitorClick, onSceneReady }) {
             }
         };
     }, [hoveredMesh]);
+    
+    // Handle GLB loading error - moved after all hooks
+    if (error) {
+        console.error('Failed to load GLB model:', error);
+        return (
+            <group>
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[4, 4, 4]} />
+                    <meshStandardMaterial color="#667eea" />
+                </mesh>
+                <Text position={[0, 2, 0]} fontSize={0.5} color="white">
+                    Portfolio Room
+                </Text>
+                <Text position={[0, 1.5, 0]} fontSize={0.3} color="white">
+                    (Loading 3D model...)
+                </Text>
+            </group>
+        );
+    }
+
+    if (!scene) {
+        return null; // Loading state
+    }
     
     // Add hover handler
     const handlePointerMove = (event) => {
@@ -486,6 +562,7 @@ export default function GLBModel() {
     const [showCarousel, setShowCarousel] = useState(false);
     const [loadedScene, setLoadedScene] = useState(null);
     const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark theme
+    const [isLoading, setIsLoading] = useState(true);
     const controlsRef = useRef();
 
     const handleMonitorClick = () => {
@@ -515,23 +592,37 @@ export default function GLBModel() {
     
     const handleSceneReady = (scene) => {
         setLoadedScene(scene);
+        setIsLoading(false);
     };
 
     return (
         <ErrorBoundary>
             <div className="glb-model-container fullscreen">
+                {/* HTML Loading Screen Overlay */}
+                {isLoading && <LoadingScreenHTML />}
                 <Canvas
                     camera={{ position: [0, 2, 7], fov: 75 }}
                     style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }}
                     gl={{
                         antialias: true,
                         alpha: false,
-                        powerPreference: "high-performance"
+                        powerPreference: "high-performance",
+                        preserveDrawingBuffer: true,
+                        failIfMajorPerformanceCaveat: false
                     }}
-                    onCreated={(state) => {
+                    onCreated={({ gl }) => {
+                        // Handle WebGL context loss
+                        gl.domElement.addEventListener('webglcontextlost', (event) => {
+                            event.preventDefault();
+                            console.warn('WebGL context lost, reloading...');
+                        });
+                        
+                        gl.domElement.addEventListener('webglcontextrestored', () => {
+                            console.log('WebGL context restored');
+                        });
                     }}
                 >
-                    <Suspense fallback={null}>
+                    <Suspense fallback={<LoadingScreen3D />}>
                         <CameraController isDarkTheme={isDarkTheme} />
                         <AnimatedCelestialBody isDarkTheme={isDarkTheme} />
                         <Environment preset={isDarkTheme ? "lobby" : "apartment"} />

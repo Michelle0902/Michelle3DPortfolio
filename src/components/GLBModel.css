@@ -129,6 +129,123 @@
     background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
 }
 
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.loading-container {
+    text-align: center;
+    max-width: 500px;
+    padding: 2rem;
+}
+
+.loading-spinner {
+    margin-bottom: 2rem;
+}
+
+.spinner {
+    width: 80px;
+    height: 80px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top: 4px solid #fff;
+    border-right: 4px solid #00f2fe;
+    border-radius: 50%;
+    animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    margin: 0 auto;
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-content h2 {
+    font-size: 2.5rem;
+    margin: 0 0 1rem 0;
+    font-weight: 300;
+    background: linear-gradient(45deg, #fff, #00f2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.loading-text {
+    font-size: 1.3rem;
+    margin: 0 0 2rem 0;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.progress-container {
+    margin: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-bar {
+    width: 300px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #00f2fe 100%);
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+.progress-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #00f2fe;
+    text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+.loading-tips {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-hint {
+    font-size: 0.95rem;
+    margin: 0.8rem 0;
+    opacity: 0.85;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
 .error-fallback {
     display: flex;
     flex-direction: column;
@@ -149,6 +266,60 @@
 .error-fallback p {
     font-size: 1.1rem;
     opacity: 0.9;
+}
+
+/* Loading screen responsive design */
+@media (max-width: 768px) {
+    .loading-container {
+        padding: 1rem;
+        max-width: 90%;
+    }
+    
+    .loading-content h2 {
+        font-size: 2rem;
+    }
+    
+    .loading-text {
+        font-size: 1.1rem;
+    }
+    
+    .progress-bar {
+        width: 250px;
+    }
+    
+    .spinner {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .loading-tips {
+        padding: 1rem;
+    }
+    
+    .loading-hint {
+        font-size: 0.85rem;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .loading-container {
+        padding: 0.5rem;
+    }
+    
+    .loading-content h2 {
+        font-size: 1.8rem;
+    }
+    
+    .progress-bar {
+        width: 200px;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+    }
 }
 
 /* Responsive design */
