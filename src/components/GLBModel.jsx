@@ -67,10 +67,11 @@ function LoadingScreenHTML() {
                     
                     <div className="loading-tips">
                         <p className="loading-hint">
-                            💡 <strong>Tip:</strong> This detailed 3D portfolio room includes interactive elements
+                            <strong>Tip:</strong> 
+                            This detailed 3D portfolio room includes interactive elements
                         </p>
                         <p className="loading-hint">
-                            🎯 Look for the glowing monitor to explore my work experience
+                            Hint: Look for the glowing monitor to explore my work experiences ^^!
                         </p>
                     </div>
                 </div>
