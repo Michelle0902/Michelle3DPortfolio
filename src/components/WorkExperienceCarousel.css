@@ -19,7 +19,7 @@
     position: fixed;
     right: 0;
     top: 0;
-    width: 900px;
+    width: 50%;
     max-width: 90vw;
     height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
