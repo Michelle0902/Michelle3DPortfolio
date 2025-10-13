@@ -5,6 +5,7 @@ import { Raycaster, Vector2 } from 'three';
 import * as THREE from 'three';
 import WorkExperienceCarousel from './WorkExperienceCarousel';
 import './GLBModel.css';
+import blobConfig from '../blob-config.json';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -294,8 +295,8 @@ function MonitorArrows({ scene }) {
 }
 
 function Model({ onMonitorClick, onSceneReady }) {
-    // Use API endpoint for production (Vercel), direct path for development
-    const glbPath = import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
+    // Use Blob URL if available, otherwise fallback to local/production paths
+    const glbPath = blobConfig.blobUrl || (import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb');
     const { scene, error } = useGLTF(glbPath);
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);

@@ -7,13 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "upload-glb": "node scripts/upload-glb.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.3.0",
     "@tanstack/react-query": "^5.87.4",
     "@tanstack/react-query-devtools": "^5.87.4",
+    "@vercel/blob": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
