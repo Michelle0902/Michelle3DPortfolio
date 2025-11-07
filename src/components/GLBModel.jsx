@@ -7,6 +7,26 @@ import WorkExperienceCarousel from './WorkExperienceCarousel';
 import './GLBModel.css';
 import blobConfig from '../blob-config.json';
 
+// Mobile detection utility
+const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           window.innerWidth < 768;
+};
+
+// Performance detection
+const getDevicePerformance = () => {
+    const isMobile = isMobileDevice();
+    const hardwareConcurrency = navigator.hardwareConcurrency || 2;
+    const deviceMemory = navigator.deviceMemory || 4;
+    
+    if (isMobile && (hardwareConcurrency <= 4 || deviceMemory <= 2)) {
+        return 'low'; // Low-end mobile
+    } else if (isMobile) {
+        return 'medium'; // Mid-range mobile
+    }
+    return 'high'; // Desktop or high-end device
+};
+
 // 3D Loading Component (for Canvas fallback)
 function LoadingScreen3D() {
     const { progress } = useProgress();
@@ -110,21 +130,24 @@ class ErrorBoundary extends React.Component {
 }
 
 // Animated Moon/Sun Component
-function AnimatedCelestialBody({ isDarkTheme }) {
+function AnimatedCelestialBody({ isDarkTheme, performance }) {
     const moonRef = useRef();
     const sunRef = useRef();
     const [targetY, setTargetY] = React.useState(isDarkTheme ? 50 : -20);
+    const shouldAnimate = performance === 'high'; // Only animate on high-performance devices
     
     React.useEffect(() => {
-        setTargetY(isDarkTheme ? 40 : -20); // Moon up (50) when dark, down (-20) when light
+        setTargetY(isDarkTheme ? 40 : -20);
     }, [isDarkTheme]);
     
     useFrame(() => {
+        if (!shouldAnimate) return; // Skip animation on mobile
+        
         // Smoothly animate moon position
         if (moonRef.current) {
             const currentY = moonRef.current.position.y;
             const diff = targetY - currentY;
-            moonRef.current.position.y += diff * 0.05; // Smooth interpolation
+            moonRef.current.position.y += diff * 0.05;
             
             // Fade moon in/out
             if (moonRef.current.material) {
@@ -135,7 +158,7 @@ function AnimatedCelestialBody({ isDarkTheme }) {
         
         // Smoothly animate sun position
         if (sunRef.current) {
-            const sunTargetY = isDarkTheme ? -20 : 40; // Sun down when dark, up when light
+            const sunTargetY = isDarkTheme ? -20 : 40;
             const currentY = sunRef.current.position.y;
             const diff = sunTargetY - currentY;
             sunRef.current.position.y += diff * 0.05;
@@ -148,11 +171,14 @@ function AnimatedCelestialBody({ isDarkTheme }) {
         }
     });
     
+    // Simplified geometry for low-performance devices
+    const segments = performance === 'low' ? 8 : (performance === 'medium' ? 16 : 32);
+    
     return (
         <group>
             {/* Moon */}
             <mesh ref={moonRef} position={[30, isDarkTheme ? 50 : -20, -30]}>
-                <sphereGeometry args={[3, 32, 32]} />
+                <sphereGeometry args={[3, segments, segments]} />
                 <meshStandardMaterial 
                     color="#f0f0f0"
                     emissive="#8888ff"
@@ -164,7 +190,7 @@ function AnimatedCelestialBody({ isDarkTheme }) {
             
             {/* Sun */}
             <mesh ref={sunRef} position={[30, isDarkTheme ? -20 : 50, -30]}>
-                <sphereGeometry args={[4, 32, 32]} />
+                <sphereGeometry args={[4, segments, segments]} />
                 <meshStandardMaterial 
                     color="#ffff00"
                     emissive="#ffaa00"
@@ -218,26 +244,27 @@ function CameraController({ isDarkTheme }) {
 }
 
 // Animated Arrow Component pointing to the monitor
-function AnimatedArrow({ position, rotation, delay = 0 }) {
+function AnimatedArrow({ position, rotation, delay = 0, performance }) {
     const arrowRef = useRef();
+    const shouldAnimate = performance === 'high';
     
     useFrame((state) => {
+        if (!shouldAnimate || !arrowRef.current) return;
+        
         const time = state.clock.getElapsedTime();
         
-        if (arrowRef.current) {
-            // Floating animation
-            arrowRef.current.position.y = position[1] + Math.sin(time * 2 + delay) * 0.2;
-            
-            // Gentle rotation/wobble
-            arrowRef.current.rotation.z = rotation[2] + Math.sin(time * 3 + delay) * 0.15;
-            
-            // Pulsing scale
-            const scale = 1 + Math.sin(time * 2 + delay) * 0.15;
-            arrowRef.current.scale.set(scale, scale, scale);
-            
-            // Rotate around Y axis for spinning effect
-            arrowRef.current.rotation.y += 0.01;
-        }
+        // Floating animation
+        arrowRef.current.position.y = position[1] + Math.sin(time * 2 + delay) * 0.2;
+        
+        // Gentle rotation/wobble
+        arrowRef.current.rotation.z = rotation[2] + Math.sin(time * 3 + delay) * 0.15;
+        
+        // Pulsing scale
+        const scale = 1 + Math.sin(time * 2 + delay) * 0.15;
+        arrowRef.current.scale.set(scale, scale, scale);
+        
+        // Rotate around Y axis for spinning effect
+        arrowRef.current.rotation.y += 0.01;
     });
     
     return (
@@ -273,7 +300,7 @@ function AnimatedArrow({ position, rotation, delay = 0 }) {
 }
 
 // Component to add arrows around the monitor
-function MonitorArrows({ scene }) {
+function MonitorArrows({ scene, performance }) {
     const [monitorPosition, setMonitorPosition] = useState(null);
     
     React.useEffect(() => {
@@ -316,7 +343,7 @@ function MonitorArrows({ scene }) {
                 
                 // Rotation to point toward monitor center
                 const rotationY = Math.PI / 2;
-                const rotationX = Math.PI; // Slight upward angle
+                const rotationX = Math.PI;
                 
                 return (
                     <AnimatedArrow
@@ -324,6 +351,7 @@ function MonitorArrows({ scene }) {
                         position={[x, y, z]}
                         rotation={[rotationX, rotationY, 0]}
                         delay={i * 0.4}
+                        performance={performance}
                     />
                 );
             })}
@@ -341,45 +369,44 @@ function MonitorArrows({ scene }) {
             >
                 
             </Text>
-            
-            {/* Additional arrows at different heights
-            {Array.from({ length: 4 }).map((_, i) => {
-                const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
-                const x = monitorPosition.x + Math.cos(angle) * (radius * 0.7);
-                const z = monitorPosition.z + Math.sin(angle) * (radius * 0.7);
-                const y = monitorPosition.y + 0.6; // Higher level
-                
-                // const rotationY = angle + Math.PI / 2;
-                // const rotationX = Math.PI / 8; // Point downward
-                const rotationY = Math.PI / 2;
-                const rotationX = Math.PI;
-                
-                return (
-                    <AnimatedArrow
-                        key={`upper-${i}`}
-                        position={[x, y, z]}
-                        rotation={[rotationX, rotationY, 0]}
-                        delay={i * 0.6 + 2}
-                    />
-                );
-            })} */}
         </group>
     );
 }
 
-function Model({ onMonitorClick, onSceneReady }) {
-    // Use Blob URL if available, otherwise fallback to local/production paths
-    const glbPath = blobConfig.blobUrl || (import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb');
+function Model({ onMonitorClick, onSceneReady, performance }) {
+    // Multi-source fallback strategy: Try sources in order until one works
+    const getGLBPath = () => {
+        const sources = blobConfig.sources || {};
+        const fallbackOrder = blobConfig.fallbackOrder || ['cloudflareR2', 'githubRelease', 'vercelBlob', 'local'];
+        
+        // Try each source in fallback order
+        for (const source of fallbackOrder) {
+            if (source === 'local') {
+                // Local fallback for development or API endpoint for production
+                return import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
+            }
+            
+            if (sources[source] && sources[source].trim() !== '') {
+                console.log(`Loading GLB from: ${source}`);
+                return sources[source];
+            }
+        }
+        
+        // Ultimate fallback
+        return import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
+    };
+    
+    const glbPath = getGLBPath();
+    console.log('Final GLB Path:', glbPath); // Debug log
     const { scene, error } = useGLTF(glbPath, true); // true = draco compression enabled
     
-    // Track loading progress (for future use)
-    // const [loadingProgress, setLoadingProgress] = useState(0);
     const { camera, gl } = useThree();
     const [hoveredMesh, setHoveredMesh] = useState(null);
     const raycaster = useRef(new Raycaster());
     const mouse = useRef(new Vector2());
     const monitorRef = useRef();
     const originalMaterials = useRef({});
+    const enableHoverEffects = performance === 'high'; // Only enable hover on desktop
     
     // Notify parent when scene is ready
     React.useEffect(() => {
@@ -450,8 +477,10 @@ function Model({ onMonitorClick, onSceneReady }) {
         return null; // Loading state
     }
     
-    // Add hover handler
+    // Add hover handler (only on high-performance devices)
     const handlePointerMove = (event) => {
+        if (!enableHoverEffects) return; // Skip hover on mobile
+        
         event.stopPropagation();
         
         // Get mouse position relative to the canvas
@@ -564,7 +593,15 @@ export default function GLBModel() {
     const [loadedScene, setLoadedScene] = useState(null);
     const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark theme
     const [isLoading, setIsLoading] = useState(true);
+    const [performance, setPerformance] = useState('high');
     const controlsRef = useRef();
+
+    // Detect device performance on mount
+    React.useEffect(() => {
+        const detectedPerformance = getDevicePerformance();
+        setPerformance(detectedPerformance);
+        console.log('Device performance detected:', detectedPerformance);
+    }, []);
 
     const handleMonitorClick = () => {
         setShowCarousel(true);
@@ -574,15 +611,11 @@ export default function GLBModel() {
         setShowCarousel(false);
     };
 
-    // Debug carousel state
-    React.useEffect(() => {
-    }, [showCarousel]);
     const resetCamera = () => {
         if (controlsRef.current) {
             // Reset camera to specific viewing position
             const camera = controlsRef.current.object; // Get the camera from controls
             camera.position.set(-10, -2, 10);
-            // controlsRef.current.target.set(-10, -2, 10); // Look at center
             controlsRef.current.update(); // Update the controls
         }
     };
@@ -595,6 +628,17 @@ export default function GLBModel() {
         setLoadedScene(scene);
         setIsLoading(false);
     };
+    
+    // Performance-based settings
+    const isMobile = isMobileDevice();
+    const canvasSettings = {
+        antialias: performance === 'high',
+        alpha: false,
+        powerPreference: performance === 'low' ? 'low-power' : 'high-performance',
+        preserveDrawingBuffer: true,
+        failIfMajorPerformanceCaveat: false,
+        pixelRatio: performance === 'low' ? 1 : (performance === 'medium' ? 1.5 : window.devicePixelRatio)
+    };
 
     return (
         <ErrorBoundary>
@@ -604,14 +648,12 @@ export default function GLBModel() {
                 <Canvas
                     camera={{ position: [0, 2, 7], fov: 75 }}
                     style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }}
-                    gl={{
-                        antialias: true,
-                        alpha: false,
-                        powerPreference: "high-performance",
-                        preserveDrawingBuffer: true,
-                        failIfMajorPerformanceCaveat: false
-                    }}
+                    gl={canvasSettings}
+                    dpr={canvasSettings.pixelRatio}
                     onCreated={({ gl }) => {
+                        // Set pixel ratio based on performance
+                        gl.setPixelRatio(canvasSettings.pixelRatio);
+                        
                         // Handle WebGL context loss
                         gl.domElement.addEventListener('webglcontextlost', (event) => {
                             event.preventDefault();
@@ -625,21 +667,30 @@ export default function GLBModel() {
                 >
                     <Suspense fallback={<LoadingScreen3D />}>
                         <CameraController isDarkTheme={isDarkTheme} />
-                        <AnimatedCelestialBody isDarkTheme={isDarkTheme} />
+                        <AnimatedCelestialBody isDarkTheme={isDarkTheme} performance={performance} />
                         <Environment preset={isDarkTheme ? "lobby" : "apartment"} />
                         <ambientLight intensity={isDarkTheme ? 0.5 : 0.8} />
-                        <directionalLight position={[10, 10, 5]} intensity={isDarkTheme ? 1.5 : 2.0} />
-                                   <Model onMonitorClick={handleMonitorClick} onSceneReady={handleSceneReady} />
-                        {loadedScene && <MonitorArrows scene={loadedScene} />}
+                        <directionalLight 
+                            position={[10, 10, 5]} 
+                            intensity={isDarkTheme ? 1.5 : 2.0}
+                        />
+                        <Model 
+                            onMonitorClick={handleMonitorClick} 
+                            onSceneReady={handleSceneReady}
+                            performance={performance}
+                        />
+                        {loadedScene && <MonitorArrows scene={loadedScene} performance={performance} />}
                         <OrbitControls 
                             ref={controlsRef}
-                            enablePan={true}
+                            enablePan={!isMobile}
                             enableZoom={true}
                             enableRotate={true}
                             minDistance={2}
                             maxDistance={20}
                             target={[0, 0, 0]}
                             autoRotate={false}
+                            enableDamping={performance !== 'low'}
+                            dampingFactor={0.05}
                         />
                     </Suspense>
                 </Canvas>
@@ -647,8 +698,15 @@ export default function GLBModel() {
                            {!showCarousel && (
                                <div className="model-info">
                                    <p>Interactive 3D Portfolio Room</p>
+                                   {isMobile && (
+                                       <p className="controls-hint" style={{color: '#ffd700', fontSize: '0.85em'}}>
+                                           📱 Mobile-optimized mode active
+                                       </p>
+                                   )}
                                    <p className="controls-hint">🎯 <strong>Follow the orange arrows</strong> to find the monitor!</p>
-                                   <p className="controls-hint">Use mouse to rotate, scroll to zoom, and drag to pan</p>
+                                   <p className="controls-hint">
+                                       {isMobile ? 'Touch to interact, pinch to zoom' : 'Use mouse to rotate, scroll to zoom, and drag to pan'}
+                                   </p>
                                    <div className="button-group">
                                        <button className="reset-camera-btn" onClick={resetCamera}>
                                            📷 Reset View

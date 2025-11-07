@@ -1,4 +1,15 @@
 {
-  "blobUrl": "https://ih4hmkjuh0idhrgl.public.blob.vercel-storage.com/portfolio-room.min.glb",
-  "uploadedAt": "2025-10-13T17:12:25.046Z"
+  "sources": {
+    "cloudflareR2": "https://pub-7907767544c3499eba18b57f7d0fca9d.r2.dev/portfolio-room.min.glb",
+    "githubRelease": "",
+    "vercelBlob": "https://ih4hmkjuh0idhrgl.public.blob.vercel-storage.com/portfolio-room.min.glb"
+  },
+  "fallbackOrder": ["cloudflareR2", "vercelBlob", "githubRelease", "local"],
+  "uploadedAt": "2025-11-07T21:05:00.000Z",
+  "notes": {
+    "cloudflareR2": "Primary - 10GB free, unlimited bandwidth, CORS configured! ✅",
+    "vercelBlob": "Fallback - 1GB limit (full)",
+    "githubRelease": "Not usable - GitHub blocks CORS",
+    "local": "Dev fallback - /portfolio-room.min.glb"
+  }
 }

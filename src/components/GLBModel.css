@@ -330,6 +330,62 @@
     }
     
     .model-info {
-        padding: 12px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        bottom: 10px;
+        max-width: 90%;
+    }
+    
+    .model-info p {
+        margin: 2px 0;
+    }
+    
+    .controls-hint {
+        font-size: 0.8em !important;
+    }
+    
+    .button-group {
+        flex-direction: row;
+        gap: 6px;
+        margin-top: 6px;
+    }
+    
+    .reset-camera-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .model-info {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        bottom: 5px;
+    }
+    
+    .controls-hint {
+        font-size: 0.75em !important;
+    }
+    
+    .button-group {
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    
+    .reset-camera-btn {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Performance optimization for mobile */
+@media (max-width: 768px) {
+    /* Reduce backdrop blur on mobile for better performance */
+    .model-info {
+        backdrop-filter: blur(5px);
+    }
+    
+    .loading-tips {
+        backdrop-filter: blur(5px);
     }
 }
