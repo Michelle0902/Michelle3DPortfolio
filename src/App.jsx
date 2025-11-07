@@ -1,27 +1,56 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom' 
-import reactLogo from './assets/react.svg'
 import './App.css'
-import Header from './components/Header'
+import './components/WaitingPage.css'
 import Home from './components/Home'
-import WaitingPage from './components/WaitingPage'
 import LoadingScreen from './components/LoadingScreen'
 
 function App() {
-  return (
-    <Router>
+  // Step management: 'welcome' -> 'loading' -> 'portfolio'
+  const [currentStep, setCurrentStep] = useState('welcome');
+
+  const handleExploreClick = () => {
+    setCurrentStep('loading');
+  };
+
+  const handleLoadingComplete = () => {
+    setCurrentStep('portfolio');
+  };
+
+  // Step 1: Welcome/Waiting Page
+  if (currentStep === 'welcome') {
+    return (
       <div className="app">
-        {/* <Header /> */}
         <main className="main-content">
-          <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/" element={<WaitingPage />} />
-            <Route path="/loading" element={<LoadingScreen />} />
-          </Routes>
+          <div className="waiting-page">
+            <h1 className="hero-title">Welcome to My 3D Portfolio</h1>
+            <button onClick={handleExploreClick} className="hero-button">
+              Let's Explore My Working Space In 3D
+            </button>
+          </div>
         </main>
       </div>
-    </Router>
-  )
+    );
+  }
+
+  // Step 2: Loading Screen
+  if (currentStep === 'loading') {
+    return (
+      <div className="app">
+        <main className="main-content">
+          <LoadingScreen onComplete={handleLoadingComplete} />
+        </main>
+      </div>
+    );
+  }
+
+  // Step 3: 3D Portfolio (Home)
+  return (
+    <div className="app">
+      <main className="main-content">
+        <Home />
+      </main>
+    </div>
+  );
 }
 
 export default App
