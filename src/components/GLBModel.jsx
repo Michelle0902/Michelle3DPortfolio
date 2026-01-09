@@ -111,8 +111,10 @@ class ErrorBoundary extends React.Component {
         return { hasError: true };
     }
 
-    componentDidCatch(error, errorInfo) {
-        console.error('GLBModel Error:', error, errorInfo);
+    componentDidCatch(ERROR, ERROR_INFO) {
+        // Error handled silently - parameters are required by React lifecycle method signature
+        void ERROR;
+        void ERROR_INFO;
     }
 
     render() {
@@ -385,9 +387,8 @@ function Model({ onMonitorClick, onSceneReady, performance }) {
                 // Local fallback for development or API endpoint for production
                 return import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
             }
-            
+
             if (sources[source] && sources[source].trim() !== '') {
-                console.log(`Loading GLB from: ${source}`);
                 return sources[source];
             }
         }
@@ -397,7 +398,6 @@ function Model({ onMonitorClick, onSceneReady, performance }) {
     };
     
     const glbPath = getGLBPath();
-    console.log('Final GLB Path:', glbPath); // Debug log
     const { scene, error } = useGLTF(glbPath, true); // true = draco compression enabled
     
     const { camera, gl } = useThree();
@@ -456,7 +456,6 @@ function Model({ onMonitorClick, onSceneReady, performance }) {
     
     // Handle GLB loading error - moved after all hooks
     if (error) {
-        console.error('Failed to load GLB model:', error);
         return (
             <group>
                 <mesh position={[0, 0, 0]}>
@@ -600,7 +599,6 @@ export default function GLBModel() {
     React.useEffect(() => {
         const detectedPerformance = getDevicePerformance();
         setPerformance(detectedPerformance);
-        console.log('Device performance detected:', detectedPerformance);
     }, []);
 
     const handleMonitorClick = () => {
@@ -657,11 +655,10 @@ export default function GLBModel() {
                         // Handle WebGL context loss
                         gl.domElement.addEventListener('webglcontextlost', (event) => {
                             event.preventDefault();
-                            console.warn('WebGL context lost, reloading...');
                         });
                         
                         gl.domElement.addEventListener('webglcontextrestored', () => {
-                            console.log('WebGL context restored');
+                            // WebGL context restored
                         });
                     }}
                 >
