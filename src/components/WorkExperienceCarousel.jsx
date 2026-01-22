@@ -8,7 +8,7 @@ const workExperiences = [
         company: "KATALYST",
         client: "KATALYST",
         location: "Ho Chi Minh City, Vietnam",
-        duration: "Jul 2022 - Dec 2024",
+        duration: "Jul 2021 - Dec 2024",
         achievements: [
             "Engineered and implemented a data portal called HANAS to streamline data processing solutions, enhancing pipeline efficiency and centralizing data services for improved performance",
             "Developed the HANAS platform UI using React.js and Java, integrating backend services including DataHub, Superset/PowerBI, Dremio, Apache Ranger, and Airflow/NiFi, boosting engineer productivity by 40%"
@@ -22,7 +22,7 @@ const workExperiences = [
         company: "KATALYST",
         client: "RockitFitness",
         location: "Ho Chi Minh City, Vietnam",
-        duration: "Jul 2022 - Dec 2024",
+        duration: "Jul 2021 - Dec 2024",
         achievements: [
             "Applied Vue.js framework to design and deploy RockitFitness management system, leveraging Node.js for backend services and automating 80% of daily management tasks",
             "Collaborated with supervisors to devise innovative solutions that enhanced code readability and boosted execution speed by 10%"
@@ -36,7 +36,7 @@ const workExperiences = [
         company: "KATALYST",
         client: "Electricity of Vietnam",
         location: "Ho Chi Minh City, Vietnam",
-        duration: "Jul 2022 - Dec 2024",
+        duration: "Jul 2021 - Dec 2024",
         achievements: [
             "Built and optimized the backend of a high-throughput messaging stream system for EVN (Electricity of Vietnam) using Next.js and Apache Kafka"
         ],
@@ -49,7 +49,7 @@ const workExperiences = [
         company: "KATALYST",
         client: "Nam A Bank",
         location: "Ho Chi Minh City, Vietnam",
-        duration: "Jul 2022 - Dec 2024",
+        duration: "Jul 2021 - Dec 2024",
         achievements: [
             "Implemented secure Host-to-Host integration on Nam A Bank's SSO 2.0 with CIC, enabling SSO access and real-time credit data exchange using Java Spring Boot"
         ],
@@ -62,7 +62,7 @@ const workExperiences = [
         company: "SVTech",
         client: "SVTech",
         location: "Ho Chi Minh City, Vietnam",
-        duration: "Mar 2022 - Jun 2022",
+        duration: "Aug 2020 - Dec 2020",
         achievements: [
             "Collaborated with customers to gather, evaluate, and refine business requirements, reducing misaligned feature requests by 60%.",      
             "Designed and delivered an interactive Figma demo to guide developers through the implementation process.",
