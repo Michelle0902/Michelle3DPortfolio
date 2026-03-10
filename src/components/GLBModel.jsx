@@ -333,14 +333,14 @@ function MonitorArrows({ scene, performance }) {
     
     // Create arrows in a circle around the monitor
     const arrowCount = 3;
-    const radius = 1;
+    const radius = 1.5; // Increased radius to space arrows farther apart
     
     return (
         <group>
             {Array.from({ length: arrowCount }).map((_, i) => {
                 const angle = (i / arrowCount) * Math.PI * 2;
                 const x = monitorPosition.x + Math.cos(angle) * radius;
-                const z = monitorPosition.z + Math.sin(angle) * radius;
+                const z = monitorPosition.z + Math.sin(angle) * radius + 1.5;
                 const y = monitorPosition.y+1.1;
                 
                 // Rotation to point toward monitor center
@@ -665,7 +665,7 @@ export default function GLBModel() {
     useEffect(()=>{
         const timer = setTimeout(()=>{
             setTreeLoading(true);
-        }, 5000);
+        }, 10000);
         return () => clearTimeout(timer);
     }, [])
 
