@@ -573,7 +573,7 @@ function Model({ onMonitorClick, onSceneReady, performance }) {
     );
 }
 
-function Trees() {
+function Trees({ visible }) {
     // Resolve GLB path for trees – prefer Cloudflare R2 / other remote sources
     const getGLBPath = () => {
         const sources = blobConfig.sources || {};
@@ -591,6 +591,9 @@ function Trees() {
 
     const glbPath = getGLBPath();
     const { scene } = useGLTF(glbPath, true);
+
+    if (!visible || !scene) return null;
+
     return (
         <primitive
             object={scene}
@@ -660,12 +663,13 @@ export default function GLBModel() {
         pixelRatio: performance === 'low' ? 1 : (performance === 'medium' ? 1.2 : 1.4)
     };
 
-    const[treeLoading, setTreeLoading] = useState(false);
+    const [treeLoading, setTreeLoading] = useState(false);
 
-    useEffect(()=>{
-        const timer = setTimeout(()=>{
+    // Show trees after delay
+    useEffect(() => {
+        const timer = setTimeout(() => {
             setTreeLoading(true);
-        }, 10000);
+        }, 5000);
         return () => clearTimeout(timer);
     }, [])
 
@@ -717,8 +721,10 @@ export default function GLBModel() {
                             enableDamping={performance !== 'low'}
                             dampingFactor={0.05}
                         />
+                        <Suspense fallback={null}>
+                            <Trees visible={treeLoading} />
+                        </Suspense>
                     </Suspense>
-                    {treeLoading && <Trees />}
                 </Canvas>
                 
                            {!showCarousel && (
