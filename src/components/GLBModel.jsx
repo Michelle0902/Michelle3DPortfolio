@@ -376,25 +376,20 @@ function MonitorArrows({ scene, performance }) {
 }
 
 function Model({ onMonitorClick, onSceneReady, performance }) {
-    // Multi-source fallback strategy: Try sources in order until one works
+    // Multi-source strategy: prefer Cloudflare R2 (and other remote sources), avoid local GLB
     const getGLBPath = () => {
         const sources = blobConfig.sources || {};
-        const fallbackOrder = blobConfig.fallbackOrder || ['cloudflareR2', 'githubRelease', 'vercelBlob', 'local'];
+        // Explicit remote priority order – no local fallback by default
+        const fallbackOrder = ['cloudflareR2', 'vercelBlob', 'githubRelease'];
         
-        // Try each source in fallback order
         for (const source of fallbackOrder) {
-            if (source === 'local') {
-                // Local fallback for development or API endpoint for production
-                return import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
-            }
-
             if (sources[source] && sources[source].trim() !== '') {
                 return sources[source];
             }
         }
         
-        // Ultimate fallback
-        return import.meta.env.PROD ? '/api/glb' : '/portfolio-room.min.glb';
+        // Absolute last resort: local dev file (should not be needed when remote is configured)
+        return '/portfolio-room.min.glb';
     };
     
     const glbPath = getGLBPath();
@@ -578,6 +573,33 @@ function Model({ onMonitorClick, onSceneReady, performance }) {
     );
 }
 
+function Trees() {
+    // Resolve GLB path for trees – prefer Cloudflare R2 / other remote sources
+    const getGLBPath = () => {
+        const sources = blobConfig.sources || {};
+        const fallbackOrder = ['cloudflareR2_Trees', 'cloudflareR2', 'vercelBlob'];
+
+        for (const source of fallbackOrder) {
+            if (sources[source] && sources[source].trim() !== '') {
+                return sources[source];
+            }
+        }
+
+        // Absolute last resort: local trees file (should not be needed when remote is configured)
+        return '/TreeMesh.min.glb';
+    };
+
+    const glbPath = getGLBPath();
+    const { scene } = useGLTF(glbPath, true);
+    return (
+        <primitive
+            object={scene}
+            scale={1}
+            position={[0, -5, 0]}
+        />
+    );
+}
+
 function LoadingFallback() {
     return (
         <div className="loading-container">
@@ -633,10 +655,19 @@ export default function GLBModel() {
         antialias: performance === 'high',
         alpha: false,
         powerPreference: performance === 'low' ? 'low-power' : 'high-performance',
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: false,
         failIfMajorPerformanceCaveat: false,
-        pixelRatio: performance === 'low' ? 1 : (performance === 'medium' ? 1.5 : window.devicePixelRatio)
+        pixelRatio: performance === 'low' ? 1 : (performance === 'medium' ? 1.2 : 1.4)
     };
+
+    const[treeLoading, setTreeLoading] = useState(false);
+
+    useEffect(()=>{
+        const timer = setTimeout(()=>{
+            setTreeLoading(true);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, [])
 
     return (
         <ErrorBoundary>
@@ -649,9 +680,6 @@ export default function GLBModel() {
                     gl={canvasSettings}
                     dpr={canvasSettings.pixelRatio}
                     onCreated={({ gl }) => {
-                        // Set pixel ratio based on performance
-                        gl.setPixelRatio(canvasSettings.pixelRatio);
-                        
                         // Handle WebGL context loss
                         gl.domElement.addEventListener('webglcontextlost', (event) => {
                             event.preventDefault();
@@ -690,16 +718,12 @@ export default function GLBModel() {
                             dampingFactor={0.05}
                         />
                     </Suspense>
+                    {treeLoading && <Trees />}
                 </Canvas>
                 
                            {!showCarousel && (
                                <div className="model-info">
                                    <p>Interactive 3D Portfolio Room</p>
-                                   {isMobile && (
-                                       <p className="controls-hint" style={{color: '#ffd700', fontSize: '0.85em'}}>
-                                           📱 Mobile-optimized mode active
-                                       </p>
-                                   )}
                                    <p className="controls-hint">🎯 <strong>Follow the orange arrows</strong> to find the monitor!</p>
                                    <p className="controls-hint">
                                        {isMobile ? 'Touch to interact, pinch to zoom' : 'Use mouse to rotate, scroll to zoom, and drag to pan'}
