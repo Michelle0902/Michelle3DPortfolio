@@ -58,7 +58,7 @@ const workExperiences = [
     },
     {
         id: 5,
-        title: "Intern Business Analyst",
+        title: "Software Engineer Intern",
         company: "SVTech",
         client: "SVTech",
         location: "Ho Chi Minh City, Vietnam",
